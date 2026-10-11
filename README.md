@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prisma Auth
 
-## Getting Started
+Modul registrasi dan login dengan Next.js App Router, Prisma, MySQL, dan
+`bcryptjs`.
 
-First, run the development server:
+## Persiapan
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Jalankan MySQL melalui XAMPP atau Laragon. Pengguna `root` tanpa kata sandi
+   dapat menggunakan contoh koneksi di bawah.
+2. Salin `.env.example` menjadi `.env`, lalu sesuaikan `DATABASE_URL` dengan
+   kredensial dan nama database MySQL Anda:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```env
+   DATABASE_URL="mysql://root:@localhost:3306/db_prisma_auth"
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   Jika kata sandi berisi karakter khusus, URL-encode kata sandi tersebut.
+   Jangan commit file `.env`.
+3. Pasang dependensi dan siapkan database:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```powershell
+   npm install
+   npm run db:generate
+   npm run db:migrate -- --name init_users
+   ```
 
-## Learn More
+   Prisma akan membuat database `db_prisma_auth` bila pengguna MySQL memiliki
+   izin untuk membuat database. Migrasi awal tersedia di
+   `prisma/migrations/20261006000000_init_users`.
+4. Jalankan aplikasi:
 
-To learn more about Next.js, take a look at the following resources:
+   ```powershell
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   Buka `http://localhost:3000/register` untuk membuat akun atau
+   `http://localhost:3000/login` untuk masuk.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Endpoint
 
-## Deploy on Vercel
+- `POST /api/register` menerima `{ "name": "...", "email": "...", "password": "..." }`.
+- `POST /api/login` menerima `{ "email": "...", "password": "..." }`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Email dinormalisasi ke huruf kecil, password minimal 8 karakter dan dibatasi
+hingga 72 byte untuk kompatibilitas bcrypt, dan password hanya disimpan setelah
+di-hash. Login demo memvalidasi kredensial lalu mengembalikan ringkasan pengguna;
+modul ini belum membuat sesi persisten atau melindungi halaman privat.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Untuk membuka Prisma Studio, jalankan `npm run db:studio`.
+# TugasPrismaAuth
